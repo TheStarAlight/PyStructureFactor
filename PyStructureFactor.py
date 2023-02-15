@@ -196,7 +196,7 @@ def get_structure_factor(mol,
                         channel         = (0,0),
                         lmax            = 10,
                         hf_method       = 'RHF',
-                        atom_grid_size  = (10,38),
+                        atom_grid_level = 3,
                         orient_grid_size= (90,1),
                         rmax            = 40):
     """
@@ -213,12 +213,8 @@ def get_structure_factor(mol,
             The maximum angular quantum number (larger l would be cut off) used in the sum. Default is 10.
         hf_method : str
             Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'. [!] Note: Must use 'UHF' for multiplet molecules.
-        atom_grid_size : tuple or dict
-            Size of radial and angular grids around every atom which are set for integration:
-            1. To set the same grid for every atom, pass `(n_radial, n_angular)`.
-               e.g., by passing (20,110), the program will generate a grid of 20 radial pts and 110 angular pts for every atom of the molecule.
-            2. To set different grids for atoms, pass a `dict` of pairs like `'atom':(n_radial, n_angular)`,
-               e.g., by passing {'C':(40,110), 'H':(15,110)}, the program will generate grids with 110 angular pts for C,H atoms, while 15 radial pts for H atoms and 40 for C atoms.
+        atom_grid_level : int
+            Level of fineness of the grid used in integration (see also pyscf.dft.Grid), which controls the number of radial and angular grids, ranging from 0 to 9. Default is 3.
         orient_grid_size : tuple
             Indicates the size of (β,γ) grid (in the output) in β,γ directions respectively. Default is (90,1). The grid is uniform, with β ranging from [0,π) and γ ranging from [0,2π).
         rmax : float
@@ -284,7 +280,7 @@ def get_structure_factor(mol,
     uz1 = orbital_dip(coeff, mol)[2]
 
     g = dft.Grids(mol)
-    g.atom_grid = atom_grid_size
+    g.level = atom_grid_level
     g.radii_adjust = radi.becke_atomic_radii_adjust
     g.atomic_radii = radi.COVALENT_RADII
     g.radi_method = radi.gauss_chebyshev
