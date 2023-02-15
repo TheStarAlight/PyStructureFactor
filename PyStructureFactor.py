@@ -191,70 +191,64 @@ def orbital_dip(coeff,mol):
     uz = uz1
     return uz
 
-def get_structure_factor(mol, z=1, lmax=10,
-                     update_index=0,
-                     rmax = 40,
-                     method='RHF',
-                     atom_grid=(10,38),
-                     channel=None,
-                     yz_Eulerang_grid=None):
-    """To caculation  the molecule structure factor.
+def get_structure_factor(mol,
+                        rel_homo_index  = 0,
+                        channel         = (0,0),
+                        lmax            = 10,
+                        hf_method       = 'RHF',
+                        atom_grid_size  = (10,38),
+                        orient_grid_size= (90,1),
+                        rmax            = 40):
+    """
+    Calculates the molecular structure factor $G$ according to the given parameters.
 
-    Parameters:
+    # Parameters:
         mol : Mole
-            Molecule to calculate the structure factor for.
-        z : int
-            Ionization charge
+            The molecule object. Initialized by invoking `pyscf.M` or `pyscf.gto.M`.
+        rel_homo_index : int
+            Index of the ionizing orbital relative to the HOMO. Default is 0. e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...
+        channel : tuple
+            Parabolic channel ν=(nξ, m). Default is (0,0).
         lmax : int
-            The maximum azimuthal quantum number
-        method : str
-            'RHF' or 'UHF'.Default is 'RHF'
-        atom_grid : dict
-            set same (radial,angular) grids for every atoms.
-            Eg, atom_grid = (20,110) will generate 20 radial
-            grids and 110 angular grids for every atom of the molecule.
-            Set (radial, angular) grids for particular atoms.
-            Eg, atom_grid = {'H': (20,110)} will generate 20 radial
-            grids and 110 angular grids for H atom.
-        channel : dict
-            ionization channel ν=(nξ, m).Default is channel={'m': 0, 'n_ep': 0}.
-            m is the magnetic quantum numbers and nξ is the parabolic quantum numbers.
-        yz_Eulerang_grid : dict
-            Set (β,γ)) grids for the caculation of the molecule stracture factor.
-            The orientation of the molecule with respect to the field is specified by the three Euler angles (α,β,γ) defining a passive rotation
-            Rˆ from the LF to the MF.
-            In this calculation, we set α = 0. Default is yz_Eulerang_grid={"beta_num": 20, "gamma_num": 1}.
-        update_index : int
-            Ionization index = index of HOMO  +  update_index.Defualt is zero.
-            Eg, LUMO oribital,update_index=1
+            The maximum angular quantum number (larger l would be cut off) used in the sum. Default is 10.
+        hf_method : str
+            Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'. [!] Note: Must use 'UHF' for multiplet molecules.
+        atom_grid_size : tuple or dict
+            Size of radial and angular grids around every atom which are set for integration:
+            1. To set the same grid for every atom, pass `(n_radial, n_angular)`.
+               e.g., by passing (20,110), the program will generate a grid of 20 radial pts and 110 angular pts for every atom of the molecule.
+            2. To set different grids for atoms, pass a `dict` of pairs like `'atom':(n_radial, n_angular)`,
+               e.g., by passing {'C':(40,110), 'H':(15,110)}, the program will generate grids with 110 angular pts for C,H atoms, while 15 radial pts for H atoms and 40 for C atoms.
+        orient_grid_size : tuple
+            Indicates the size of (β,γ) grid (in the output) in β,γ directions respectively. Default is (90,1). The grid is uniform, with β ranging from [0,π) and γ ranging from [0,2π).
+        rmax : float
+            Indicates the cut off limit of the radial grid points, points of radius>rmax would not be accounted in calculation.
 
     Returns:
-        array_like
-
+        A numpy array containing the structure factors $G$ on the (β,γ) orientation grid. Shape = orient_grid_size.
     """
 
-    channel = {'m': 0, 'n_ep': 0} if channel is None else channel
-    yz_Eulerang_grid = {"beta_num": 20, "gamma_num": 1} if yz_Eulerang_grid is None else yz_Eulerang_grid
-    m = channel.get('m')
-    n_ep = channel.get('n_ep')
-    nbeta = yz_Eulerang_grid.get('beta_num')
-    gamma_num = yz_Eulerang_grid.get('gamma_num')
+    Z = mol.charge + 1
+    n_xi = channel[0]
+    m = channel[1]
+    n_beta = orient_grid_size[0]
+    n_gamma = orient_grid_size[1]
 
 
-    if method == 'RHF':
-        mf = scf.RHF(mol).run()
+    if hf_method == 'RHF':
+        mf = scf.RHF(mol).run(verbose=0)
         mo_occ = mf.mo_occ
         orbit_energy = mf.mo_energy
         coeff = mf.mo_coeff
-    elif method == 'UHF':
-        mf = scf.UHF(mol).run()
+    elif hf_method == 'UHF':
+        mf = scf.UHF(mol).run(verbose=0)
         mo_occ = mf.mo_occ[0]
         orbit_energy = mf.mo_energy[0]
         coeff = mf.mo_coeff[0]
     else:
-        raise Exception("error: method must be 'RHF' or 'UHF'")
+        raise Exception("error: method must be either 'RHF' or 'UHF'")
 
-    index = get_homo_index(mo_occ) + update_index
+    index = get_homo_index(mo_occ) + rel_homo_index
     energy_index = orbit_energy[index]
     coeff = numpy.expand_dims(coeff[:, index], axis=0)
     kappa = math.sqrt(-2 * energy_index)
@@ -273,9 +267,9 @@ def get_structure_factor(mol, z=1, lmax=10,
         ao_dip1 = mol.intor_symmetric('int1e_r', comp=3)
     dm_01 = coeff.T * coeff
     u = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
-    dip_moment = mf.dip_moment(unit="A.U.")
+    dip_moment = mf.dip_moment(unit="A.U.",verbose=0)
     D = (u - dip_moment)
-    move_distance = D/z
+    move_distance = D/Z
     atom = copy.deepcopy(mol._atom)
     for i in range(len(atom)):
         for j in range(len(atom[i][1])):
@@ -290,7 +284,7 @@ def get_structure_factor(mol, z=1, lmax=10,
     uz1 = orbital_dip(coeff, mol)[2]
 
     g = dft.Grids(mol)
-    g.atom_grid = atom_grid
+    g.atom_grid = atom_grid_size
     g.radii_adjust = radi.becke_atomic_radii_adjust
     g.atomic_radii = radi.COVALENT_RADII
     g.radi_method = radi.gauss_chebyshev
@@ -306,23 +300,23 @@ def get_structure_factor(mol, z=1, lmax=10,
     weights = weights_coords[:,0]
     coords = weights_coords[:,1:4]
 
-    vc_ionorbit = vc_orbit(mol, z, coeff, coords, dm, method=method)
+    vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, method=hf_method)
 
     def factor_part(beta_num):
-        g_gamma = numpy.zeros(shape=(1, gamma_num))
+        g_gamma = numpy.zeros(shape=(1, n_gamma))
         beta2 = symbols("beta2", real=True)
 
         def gamma_planemol(l):
-            gamma = list(numpy.linspace(0, 2 * math.pi, gamma_num))
+            gamma = list(numpy.linspace(0, 2 * math.pi, n_gamma))
             gamma = numpy.expand_dims(gamma, axis=0)
             m1 = [[i] for i in range(-l, l + 1)]
             e_gamma = numpy.exp(-1j * numpy.dot(m1, gamma))
             return e_gamma
         for l in range(abs(m), lmax + 1):
-            wvl = omega_wvl(m, n_ep, kappa, z, l)
-            omega = omega_r(kappa, z, l, coords) * wvl * weights
+            wvl = omega_wvl(m, n_xi, kappa, Z, l)
+            omega = omega_r(kappa, Z, l, coords) * wvl * weights
             l_lm1_v_appendm = numpy.dot(omega, vc_ionorbit)
-            gamma_np = 1 if gamma_num == 1 else gamma_planemol(l)
+            gamma_np = 1 if n_gamma == 1 else gamma_planemol(l)
             l_lm1_v_mgamma = numpy.multiply(l_lm1_v_appendm, gamma_np)
             beta_wigner = wigner_d_small(l, beta2)[::-1, l - m]
             g_gamma_sub = (beta_wigner.T * l_lm1_v_mgamma)
@@ -339,31 +333,9 @@ def get_structure_factor(mol, z=1, lmax=10,
         mn = pool1.map(factorpart, beta)
 
         g_beta = numpy.array(mn)
-        g_beta = g_beta.reshape(beta_num, gamma_num)
+        g_beta = g_beta.reshape(beta_num, n_gamma)
         structurefactor = g_beta * numpy.exp(-kappa * uz)
         pool1.close()
         pool1.join()
         return structurefactor
-    return factor_part(nbeta)
-
-
-if __name__ == '__main__':
-    O2 = gto.M(atom='''O  0, 0, -0.403764736
-                O 0, 0, 0.803764736
-                ''', unit='ANG', basis='pc-1', symmetry=True, spin=2)
-    nbeta = 40
-    factor_xz01 = get_structure_factor(mol=O2, method='UHF',
-                              channel={'n_ep': 0, 'm': 1},
-                              yz_Eulerang_grid = {"beta_num": nbeta, "gamma_num": 1})
-
-    '''plots'''
-    factor = numpy.real(factor_xz01 * numpy.conj(factor_xz01))
-    beta = numpy.linspace(0, 180, nbeta)
-    import matplotlib.pyplot as plt
-    plt.plot(beta, factor, label="nStructureFactor")
-    plt.xlabel('beta')
-    plt.ylabel('|G00|$^{2}$')
-    plt.title("O2")
-    plt.xlim([0, 180])
-    plt.ylim(bottom=0)
-    plt.show()
+    return factor_part(n_beta)
