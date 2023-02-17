@@ -198,6 +198,7 @@ def get_structure_factor(mol,
                         hf_method       = 'RHF',
                         atom_grid_level = 3,
                         orient_grid_size= (90,1),
+                        move_dip_zero   = True,
                         rmax            = 40):
     """
     Calculates the molecular structure factor $G$ according to the given parameters.
@@ -217,10 +218,12 @@ def get_structure_factor(mol,
             Level of fineness of the grid used in integration (see also pyscf.dft.Grid), which controls the number of radial and angular grids, ranging from 0 to 9. Default is 3.
         orient_grid_size : tuple
             Indicates the size of (β,γ) grid (in the output) in β,γ directions respectively. Default is (90,1). The grid is uniform, with β ranging from [0,π) and γ ranging from [0,2π).
+        move_dip_zero : bool
+            Indicates whether to move the molecule so that the dipole of the parent ion equals zero. Default true.
         rmax : float
-            Indicates the cut off limit of the radial grid points, points of radius>rmax would not be accounted in calculation.
+            Indicates the cut off limit of the radial grid points, points of radius>rmax would not be accounted in calculation. Default is 40.
 
-    Returns:
+    # Returns:
         A numpy array containing the structure factors $G$ on the (β,γ) orientation grid. Shape = orient_grid_size.
     """
 
@@ -250,34 +253,35 @@ def get_structure_factor(mol,
     kappa = math.sqrt(-2 * energy_index)
     dm = mf.make_rdm1()
 
-    import copy
-    atom = copy.deepcopy(mol._atom)
-    tDict = {}
-    for k in gto.Mole.build.__code__.co_varnames:
-        if k in mol.__dict__ and not k.startswith("_"):
-            tDict[k] = mol.__dict__[k]
-    tDict["atom"] = atom
-    tDict["unit"] = 'Bohr'
-    mol = gto.M(**tDict)
-    with mol.with_common_orig((0, 0, 0)):
-        ao_dip1 = mol.intor_symmetric('int1e_r', comp=3)
-    dm_01 = coeff.T * coeff
-    u = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
-    dip_moment = mf.dip_moment(unit="A.U.",verbose=0)
-    D = (u - dip_moment)
-    move_distance = D/Z
-    atom = copy.deepcopy(mol._atom)
-    for i in range(len(atom)):
-        for j in range(len(atom[i][1])):
-            atom[i][1][j] += move_distance[j]
-    tDict = {}
-    for k in gto.Mole.build.__code__.co_varnames:
-        if k in mol.__dict__ and not k.startswith("_"):
-            tDict[k] = mol.__dict__[k]
-    tDict["atom"] = atom
-    tDict["unit"] = 'Bohr'
-    mol = gto.M(**tDict)
-    uz1 = orbital_dip(coeff, mol)[2]
+    if move_dip_zero:
+        import copy
+        atom = copy.deepcopy(mol._atom)
+        tDict = {}
+        for k in gto.Mole.build.__code__.co_varnames:
+            if k in mol.__dict__ and not k.startswith("_"):
+                tDict[k] = mol.__dict__[k]
+        tDict["atom"] = atom
+        tDict["unit"] = 'Bohr'
+        mol = gto.M(**tDict)
+        with mol.with_common_orig((0, 0, 0)):
+            ao_dip1 = mol.intor_symmetric('int1e_r', comp=3)
+        dm_01 = coeff.T * coeff
+        u = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
+        dip_moment = mf.dip_moment(unit="A.U.",verbose=0)
+        D = (u - dip_moment)
+        move_distance = D/Z
+        atom = copy.deepcopy(mol._atom)
+        for i in range(len(atom)):
+            for j in range(len(atom[i][1])):
+                atom[i][1][j] += move_distance[j]
+        tDict = {}
+        for k in gto.Mole.build.__code__.co_varnames:
+            if k in mol.__dict__ and not k.startswith("_"):
+                tDict[k] = mol.__dict__[k]
+        tDict["atom"] = atom
+        tDict["unit"] = 'Bohr'
+        mol = gto.M(**tDict)
+
 
     g = dft.Grids(mol)
     g.level = atom_grid_level
@@ -296,6 +300,7 @@ def get_structure_factor(mol,
     weights = weights_coords[:,0]
     coords = weights_coords[:,1:4]
 
+    uz1 = orbital_dip(coeff, mol)[2]
     vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, method=hf_method)
 
     I = [None]*(lmax+1)   # I[l][l+m'] stores the integrals I_{lm'}^{\nu}
