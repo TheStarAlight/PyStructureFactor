@@ -4,14 +4,13 @@ import multiprocessing as mp
 from multiprocessing.dummy import Pool as ThreadPool
 from pyscf import df, scf
 from scipy import special
-# from sympy import symbols
-# from sympy.physics.wigner import wigner_d_small
 from pyscf import gto, lib, dft
 from pyscf.dft import radi
 from wigner import wigner_dl
 
 def convert_sph2cart(xyz):
-    """To transform Spherical coordinates to Cartesian coordinates
+    """
+    Transforms the spherical coordinates to Cartesian coordinates.
 
      Parameters:
          xyz: 2D float array, shape (N,3)
@@ -31,42 +30,39 @@ def convert_sph2cart(xyz):
 
 
 def get_homo_index(np1):
-    """To find the index of HOMO orbit.
-    reindex(i) is the first orbit whose occupancy number is zero, index = i - 1
+    """
+    To find the index of HOMO orbit according to the orbital occupation. Returns i-1, denoting i the first orbit whose occupancy number is zero.
 
     Parameters:
-        np1: Orbital occupancy number, 2D array
+        np1: Orbital occupancy number, array.
 
     Returns:
-        int type
-        the index of HOMO orbit
+        The index of HOMO orbit starting from 0.
     """
     for i in range(np1.size):
         if np1[i] == 0:
             return i - 1
 
 
-def vc_orbit(mol, z, coeff, coords, dm, method='RHF'):
-    """To calculate the core potential, Ionization orbit
+def vc_orbit(mol, z, coeff, coords, dm, hf_method='RHF'):
+    """To calculate the core potential times the ionizing orbital wave function, that is, V_c ψ_0.
 
     Parameters:
         mol: Mole
-            Same to :func:`pyscf.Mole.build`
-            Molecule to calculate the electron density for.
+            The molecule object.
         z: int
-            Ionization charge
-        coeff: 2D array,shape(:,index)
-            Molecular ionization orbit coefficient
+            The charge of the parent ion.
+        coeff: 2D array, shape (:,index)
+            Molecular orbital coefficient of the ionizing orbit.
         coords: 2D array, shape (N,3)
             Cartesian grid points(x,y,z)
         dm: ndarray
             Density matrix of molecule.
-        method: str
-            'RHF' or 'UHF'.Default is 'RHF'
+        hf_method : str
+            Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'.
 
     Returns:
-        float  array_like
-        the core potential.
+        The core potential oprator times the orbital wave function.
 
     """
     ngrids = coords.shape[0]
@@ -77,10 +73,10 @@ def vc_orbit(mol, z, coeff, coords, dm, method='RHF'):
         z = mol.atom_charge(i)
         rp = r - coords
         vnuc += z / numpy.einsum('xi,xi->x', rp, rp) ** .5
-    if method == 'UHF':
+    if hf_method == 'UHF':
         dm_vex = dm[0]
         dm_vele = dm[1] + dm[0]
-    elif method == 'RHF':
+    elif hf_method == 'RHF':
         dm_vex = dm / 2
         dm_vele = dm
     else:
@@ -122,54 +118,55 @@ def vc_orbit(mol, z, coeff, coords, dm, method='RHF'):
     return vc_orbit
 
 
-def omega_wvl(m, n_ep, kappa, z, l):
-    """To calculate the normalization coefficient of Omega
+def omega_wvl(m, n_xi, kappa, z, l):
+    """
+    The normalization coefficient of Omega.
 
     Parameters
         m: int
-            Magnetic quantum number; must have ``l >= m >= -l``
+            Magnetic quantum number, should satisfy `l >= m >= -l`.
         l: int
-            Angular quantum number; must have ``l >= 0``
+            Angular quantum number, should be a non-negative integer.
         n_ep: int
-              Parabolic quantum numbers; must have ``n_ep >= 0``
+            Parabolic quantum number, should be a non-negative integer.
         z: int
-            Ionization charge
+            The charge of the parent ion.
         kappa: float
-            kappa = sqrt(-2*E0). E0 is orbital energy.
+            `sqrt(-2*E0)`, E0 is orbital energy.
     Returns:
-        float
-        return the normalization coefficient of Omega
+        The normalization coefficient of Omega for the given parameter.
     """
     part1 = ((-1) ** (l + (abs(m) - m) / 2 + 1)) * (2 ** (l + 3 / 2)) * (
-            kappa ** (z / kappa - (abs(m) + 1) / 2 - n_ep))
+            kappa ** (z / kappa - (abs(m) + 1) / 2 - n_xi))
     part2 = math.sqrt(
         (2 * l + 1) * math.factorial(l + m) * math.factorial(l - m) * math.factorial(
-            abs(m) + n_ep) * math.factorial(
-            n_ep)) * math.factorial(l) / math.factorial(2 * l + 1)
-    range_len = min(n_ep, l - abs(m))
+            abs(m) + n_xi) * math.factorial(
+            n_xi)) * math.factorial(l) / math.factorial(2 * l + 1)
+    range_len = min(n_xi, l - abs(m))
     part3 = 0
 
     for k in range(range_len + 1):
-        part3 += special.gamma(l + 1 - z / kappa + n_ep - k) / (
+        part3 += special.gamma(l + 1 - z / kappa + n_xi - k) / (
                 math.factorial(k) * math.factorial(l - k) * math.factorial(abs(m) + k) * math.factorial(
-            l - abs(m) - k) * math.factorial(n_ep - k))
+            l - abs(m) - k) * math.factorial(n_xi - k))
     omega_norm = part1 * part2 * part3
     return omega_norm
 
 
 def omega_r(kappa, z, l, coords):
-    """Main part of Omega
+    """
+    Main part of Omega excluding the normalization coefficient. Will calculate all m' in [-l,l].
 
-    Parameters:
+    # Parameters:
         l : int
-            Angular quantum number; must have ``l >= 0``
+            Angular quantum number, should be a non-negative integer.
         z : int
-            Ionization charge
+            The charge of the parent ion.
         kappa : float
-            kappa = sqrt(-2*E0). E0 is orbital energy.
+            `sqrt(-2*E0)`, E0 is orbital energy.
 
     Returns:
-        float  array_like, shape(2l+1,ngrids)
+        An numpy array of shape(2l+1, len(coords)).
     """
     coords_sph = convert_sph2cart(coords)
     m1 = [[i] for i in range(-l, l + 1)]
@@ -301,7 +298,7 @@ def get_structure_factor(mol,
     coords = weights_coords[:,1:4]
 
     uz1 = orbital_dip(coeff, mol)[2]
-    vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, method=hf_method)
+    vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, hf_method=hf_method)
 
     I = [None]*(lmax+1)   # I[l][l+m'] stores the integrals I_{lm'}^{\nu}
     for l in range(abs(m), lmax + 1):
