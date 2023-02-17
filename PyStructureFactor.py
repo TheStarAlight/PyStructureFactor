@@ -4,11 +4,11 @@ import multiprocessing as mp
 from multiprocessing.dummy import Pool as ThreadPool
 from pyscf import df, scf
 from scipy import special
-from sympy import symbols
-from sympy.physics.wigner import wigner_d_small
+# from sympy import symbols
+# from sympy.physics.wigner import wigner_d_small
 from pyscf import gto, lib, dft
 from pyscf.dft import radi
-
+from wigner import wigner_dl
 
 def convert_sph2cart(xyz):
     """To transform Spherical coordinates to Cartesian coordinates
@@ -298,40 +298,23 @@ def get_structure_factor(mol,
 
     vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, method=hf_method)
 
-    def factor_part(beta_num):
-        g_gamma = numpy.zeros(shape=(1, n_gamma))
-        beta2 = symbols("beta2", real=True)
-
-        def gamma_planemol(l):
-            gamma = list(numpy.linspace(0, 2 * math.pi, n_gamma))
-            gamma = numpy.expand_dims(gamma, axis=0)
-            m1 = [[i] for i in range(-l, l + 1)]
-            e_gamma = numpy.exp(-1j * numpy.dot(m1, gamma))
-            return e_gamma
-        for l in range(abs(m), lmax + 1):
-            wvl = omega_wvl(m, n_xi, kappa, Z, l)
-            omega = omega_r(kappa, Z, l, coords) * wvl * weights
-            l_lm1_v_appendm = numpy.dot(omega, vc_ionorbit)
-            gamma_np = 1 if n_gamma == 1 else gamma_planemol(l)
-            l_lm1_v_mgamma = numpy.multiply(l_lm1_v_appendm, gamma_np)
-            beta_wigner = wigner_d_small(l, beta2)[::-1, l - m]
-            g_gamma_sub = (beta_wigner.T * l_lm1_v_mgamma)
-            g_gamma = g_gamma + g_gamma_sub
-        def factorpart(beta):
-            g_beta_gamma = g_gamma.subs({beta2: beta})
-            g_beta_gamma = numpy.array(g_beta_gamma)
-            g_beta_gamma = g_beta_gamma.astype(complex)
-            return g_beta_gamma
-        beta = numpy.linspace(0, math.pi, beta_num)
+    I = [None]*(lmax+1)   # I[l][l+m'] stores the integrals I_{lm'}^{\nu}
+    for l in range(abs(m), lmax + 1):
+        wvl = omega_wvl(m, n_xi, kappa, Z, l)
+        omega = omega_r(kappa, Z, l, coords) * wvl * weights
+        I[l] = numpy.dot(omega, vc_ionorbit)
+    def factor_G(beta,gamma):
         uz = uz1 * numpy.cos(beta)
-        uz = numpy.expand_dims(uz, axis=1)
-        pool1 = ThreadPool(20)
-        mn = pool1.map(factorpart, beta)
+        Gsum = numpy.complex128(0.0)
+        for l in range(abs(m), lmax + 1):   # l  in |m|:lmax
+            for mp in range(-l,l+1):        # m' in -l:l
+                Gsum += I[l][l+mp] * wigner_dl(l,l,m,mp,beta)[0] * numpy.exp(-1j*mp*gamma)
+        return Gsum * numpy.exp(-kappa * uz)
 
-        g_beta = numpy.array(mn)
-        g_beta = g_beta.reshape(beta_num, n_gamma)
-        structurefactor = g_beta * numpy.exp(-kappa * uz)
-        pool1.close()
-        pool1.join()
-        return structurefactor
-    return factor_part(n_beta)
+    beta_grid = numpy.linspace(0, math.pi, n_beta)
+    gamma_grid = numpy.linspace(0, 2*math.pi, n_gamma)
+    G_grid = numpy.zeros(shape=(n_beta,n_gamma), dtype=numpy.complex128)
+    for ibeta in range(n_beta):
+        for igamma in range(n_gamma):
+            G_grid[ibeta,igamma] = factor_G(beta_grid[ibeta],gamma_grid[igamma])
+    return G_grid
