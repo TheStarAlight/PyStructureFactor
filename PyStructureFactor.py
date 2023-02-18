@@ -302,7 +302,7 @@ def get_structure_factor(mol,
         omega = omega_r(kappa, Z, l, coords) * wvl * weights
         I[l] = numpy.dot(omega, vc_ionorbit)
     def factor_G(beta,gamma):
-        uz = (-u_lab[0] * cos(gamma) + u_lab[1] * sin(gamma))*sin(beta) + u_lab[2] * numpy.cos(beta)
+        uz = (-u_lab[0] * numpy.cos(gamma) + u_lab[1] * numpy.sin(gamma))*numpy.sin(beta) + u_lab[2] * numpy.cos(beta)
         Gsum = numpy.complex128(0.0)
         for l in range(abs(m), lmax + 1):   # l  in |m|:lmax
             for mp in range(-l,l+1):        # m' in -l:l
