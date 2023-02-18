@@ -1,6 +1,6 @@
 # O2_example.py
 # Usage: place this file under the same path with the PyStructureFactor.py, and execute this file.
-from PyStructureFactor import get_structure_factor
+from PyStructureFactor import get_structure_factor, get_homo_index
 import numpy as np
 import pyscf
 n_beta  = 90
@@ -11,10 +11,10 @@ task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
 index = get_homo_index(mo_occ[0])
 coeff = task.mo_coeff[0]
-coeff = numpy.expand_dims(coeff[:, index], axis=0)
-yz_plane = numpy.array([[0,0.2,0.2],[0,1,0.5],[0,5,6]]) # choose some pts on x=0 plane to evaluate the wfn
+coeff = np.expand_dims(coeff[:, index], axis=0)
+yz_plane = np.array([[0,0.2,0.2],[0,1,0.5],[0,5,6]]) # choose some pts on x=0 plane to evaluate the wfn
 ao = molO2.eval_gto('GTOval', yz_plane)
-wfn = numpy.dot(ao, coeff.T)
+wfn = np.dot(ao, coeff.T)
 index_yz = 0
 index_xz = 0
 if wfn.all() <= 1e-9:
@@ -22,7 +22,7 @@ if wfn.all() <= 1e-9:
 else:
     index_yz = -1
 # =================================
-beta_grid = np.linspace(0, numpy.pi, n_beta)
+beta_grid = np.linspace(0, np.pi, n_beta)
 O2_HOMOxz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,0),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,

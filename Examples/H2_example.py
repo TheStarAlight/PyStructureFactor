@@ -6,7 +6,7 @@ import pyscf
 n_beta  = 90
 n_gamma = 1
 molH2 = pyscf.M(atom="H 0,0,0.37; H 0,0,-0.37", basis="pc-4", spin=0)
-beta_grid = np.linspace(0, numpy.pi, n_beta)
+beta_grid = np.linspace(0, np.pi, n_beta)
 H2G00 = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
                              lmax = 10, hf_method = "RHF",
                              atom_grid_level = 3,

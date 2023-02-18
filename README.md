@@ -12,6 +12,9 @@ import pyscf
 ```
 to the header of your program.
 
+### Dependencies
+The program depends on the following python packages:
+`numpy`, `scipy`, `pyscf` and `wigner`. If you encountered error when installing the `wigner` package, try a different package source or directly install from a whl file. In the examples, `matplotlib` is used for plotting.
 
 ## Usage
 
@@ -35,16 +38,16 @@ def get_structure_factor(mol,
 `lmax` : The maximum angular quantum number (larger l would be cut off) used in the sum. **Default is `10`.**\
 `hf_method` : Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. **Default is `'RHF'`.** *[!] Note: Must use 'UHF' for multiplet molecules.*\
 `atom_grid_level` : Level of fineness of the grid used in integration (see also `pyscf.dft.Grid`), which controls the number of radial and angular grids, ranging from 0 to 9. **Default is `3`.**\
-`orient_grid_size` : Indicates the size of $(β,γ)$ grid (in the output) in $β$,$γ$ directions respectively. **Default is `(90,1)`**. The grid is uniform, with $β$ ranging from $[0,π)$ and $γ$ ranging from $[0,2π)$.\
+`orient_grid_size` : Indicates the size of $(\beta,\gamma)$ grid (in the output) in $\beta$,$\gamma$ directions respectively. **Default is `(90,1)`**. The grid is uniform, with $\beta$ ranging from $[0,\pi)$ and $γ$ ranging from $[0,2\pi)$. Setting the $\gamma$ grid count to 1 indicates that $\gamma$ would be zero throughout the calculation.\
 `move_dip_zero` : Indicates whether to move the molecule so that the dipole of the parent ion equals zero. **Default `True`.**\
 `rmax` : [Keep default] Indicates the cut off limit of the radial grid points, points of radius>`rmax` would not be accounted in calculation. **Default is `40`.**
 
 ### Returns
-A numpy array containing the structure factors $G_{n_ξ, m}$ of the given channel on the $(β,γ)$ orientation grid. Shape = `orient_grid_size`.
+A numpy array containing the structure factors $G_{n_ξ,\ m}$ of the given channel on the $(\beta,\gamma)$ orientation grid. Shape = `orient_grid_size`.
 
 ### Tips on parameter choice
 1. Always specify the `basis` parameter when initialzing the PySCF molecule object and choose a basis set of high-accuracy. The calculation's reliability is sensitive to the wave function, a better basis set is crucial in obtaining a satisfying result.
-2. When initializing the molecule object, for singlet molecules, specify `atom` and `basis`. If your molecule is a multiplet, you should also specify `spin=<2S>`, and set `hf_method = 'UHF'`.
+2. When initializing the molecule object, for singlet molecules, specify `atom` and `basis`. If your molecule is a multiplet, you should also specify `spin=<2S>`, and set `hf_method='UHF'`.
 3. If the ionizing orbit of your molecule has degeneracy, set `symmetry=True` in the molecule's constructor method, and the PySCF would help in splitting the degenerate orbits according to the symmetry. To identify their symmetry, see the example of O2.
 
 ## Examples
@@ -59,7 +62,7 @@ import pyscf
 n_beta  = 90
 n_gamma = 1
 molH2 = pyscf.M(atom="H 0,0,0.37; H 0,0,-0.37", basis="pc-1", spin=0)
-beta_grid = np.linspace(0, numpy.pi, n_beta)
+beta_grid = np.linspace(0, np.pi, n_beta)
 G_grid = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
                               lmax = 10, hf_method = "RHF",
                               atom_grid_level = 3,
@@ -74,7 +77,7 @@ import pyscf
 n_beta  = 90
 n_gamma = 1
 molH2 = pyscf.M(atom="H 0,0,0.37; H 0,0,-0.37", basis="pc-4", spin=0)
-beta_grid = np.linspace(0, numpy.pi, n_beta)
+beta_grid = np.linspace(0, np.pi, n_beta)
 H2G00 = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
                              lmax = 10, hf_method = "RHF",
                              atom_grid_level = 3,
@@ -111,7 +114,7 @@ plt.show()
 ### O2 example
 
 ```
-from PyStructureFactor import get_structure_factor
+from PyStructureFactor import get_structure_factor, get_homo_index
 import numpy as np
 import pyscf
 n_beta  = 90
@@ -122,10 +125,10 @@ task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
 index = get_homo_index(mo_occ[0])
 coeff = task.mo_coeff[0]
-coeff = numpy.expand_dims(coeff[:, index], axis=0)
-yz_plane = numpy.array([[0,0.2,0.2],[0,1,0.5],[0,5,6]]) # choose some pts on x=0 plane to evaluate the wfn
+coeff = np.expand_dims(coeff[:, index], axis=0)
+yz_plane = np.array([[0,0.2,0.2],[0,1,0.5],[0,5,6]]) # choose some pts on x=0 plane to evaluate the wfn
 ao = molO2.eval_gto('GTOval', yz_plane)
-wfn = numpy.dot(ao, coeff.T)
+wfn = np.dot(ao, coeff.T)
 index_yz = 0
 index_xz = 0
 if wfn.all() <= 1e-9:
@@ -133,7 +136,7 @@ if wfn.all() <= 1e-9:
 else:
     index_yz = -1
 # =================================
-beta_grid = np.linspace(0, numpy.pi, n_beta)
+beta_grid = np.linspace(0, np.pi, n_beta)
 O2_HOMOxz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,0),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
