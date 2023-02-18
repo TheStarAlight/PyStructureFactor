@@ -55,7 +55,7 @@ A numpy array containing the structure factors $G_{n_ξ,\ m}$ of the given chann
 To run the examples, create a new python script file under the same path with the main program file, paste the following code below, and run the script.
 
 ### A minimal example
-```
+```py
 from PyStructureFactor import get_structure_factor
 import numpy as np
 import pyscf
@@ -70,7 +70,7 @@ G_grid = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
 ```
 
 ### H2 example
-```
+```py
 from PyStructureFactor import get_structure_factor
 import numpy as np
 import pyscf
@@ -113,7 +113,7 @@ plt.show()
 
 ### O2 example
 
-```
+```py
 from PyStructureFactor import get_structure_factor, get_homo_index
 import numpy as np
 import pyscf
