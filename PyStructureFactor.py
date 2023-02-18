@@ -184,9 +184,8 @@ def orbital_dip(coeff,mol):
     with mol.with_common_orig((0, 0, 0)):
         ao_dip1 = mol.intor_symmetric('int1e_r', comp=3)
     dm_01 = coeff.T * coeff
-    uz1 = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
-    uz = uz1
-    return uz
+    u_lab = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
+    return u_lab
 
 def get_structure_factor(mol,
                         rel_homo_index  = 0,
@@ -260,10 +259,7 @@ def get_structure_factor(mol,
         tDict["atom"] = atom
         tDict["unit"] = 'Bohr'
         mol = gto.M(**tDict)
-        with mol.with_common_orig((0, 0, 0)):
-            ao_dip1 = mol.intor_symmetric('int1e_r', comp=3)
-        dm_01 = coeff.T * coeff
-        u = -numpy.einsum('xij,ji->x', ao_dip1, dm_01).real
+        u = orbital_dip(coeff,mol)
         dip_moment = mf.dip_moment(unit="A.U.",verbose=0)
         D = (u - dip_moment)
         move_distance = D/Z
@@ -297,7 +293,7 @@ def get_structure_factor(mol,
     weights = weights_coords[:,0]
     coords = weights_coords[:,1:4]
 
-    uz1 = orbital_dip(coeff, mol)[2]
+    u_lab = orbital_dip(coeff, mol)
     vc_ionorbit = vc_orbit(mol, Z, coeff, coords, dm, hf_method=hf_method)
 
     I = [None]*(lmax+1)   # I[l][l+m'] stores the integrals I_{lm'}^{\nu}
@@ -306,7 +302,7 @@ def get_structure_factor(mol,
         omega = omega_r(kappa, Z, l, coords) * wvl * weights
         I[l] = numpy.dot(omega, vc_ionorbit)
     def factor_G(beta,gamma):
-        uz = uz1 * numpy.cos(beta)
+        uz = (-u_lab[0] * cos(gamma) + u_lab[1] * sin(gamma))*sin(beta) + u_lab[2] * numpy.cos(beta)
         Gsum = numpy.complex128(0.0)
         for l in range(abs(m), lmax + 1):   # l  in |m|:lmax
             for mp in range(-l,l+1):        # m' in -l:l
