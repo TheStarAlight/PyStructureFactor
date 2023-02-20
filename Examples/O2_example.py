@@ -5,7 +5,7 @@ import numpy as np
 import pyscf
 n_beta  = 90
 n_gamma = 1
-molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2, symmetry=True)    # must add `symmetry=True` for molecules with degenerate HOMOs.
+molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2, symmetry=True)
 # === HOMO & HOMO-1 are degenerate, need to distinguish HOMO-xz & HOMO-yz
 task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
@@ -17,17 +17,12 @@ ao = molO2.eval_gto('GTOval', yz_plane)
 wfn = np.dot(ao, coeff.T)
 index_yz = 0
 index_xz = 0
-if wfn.all() <= 1e-9:
+if np.all(abs(wfn) <= 1e-9):
     index_xz = -1
 else:
     index_yz = -1
 # =================================
 beta_grid = np.linspace(0, np.pi, n_beta)
-O2_HOMOxz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,0),
-                           lmax = 10, hf_method = "UHF",
-                           atom_grid_level = 7,
-                           orient_grid_size = (n_beta, n_gamma))
-print("O2_HOMOxz_G00 finished.")
 O2_HOMOxz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,

@@ -48,7 +48,6 @@ A numpy array containing the structure factors $G_{n_ξ,\ m}$ of the given chann
 ### Tips on parameter choice
 1. Always specify the `basis` parameter when initialzing the PySCF molecule object and choose a basis set of high-accuracy. The calculation's reliability is sensitive to the wave function, a better basis set is crucial in obtaining a satisfying result.
 2. When initializing the molecule object, for singlet molecules, specify `atom` and `basis`. If your molecule is a multiplet, you should also specify `spin=<2S>`, and set `hf_method='UHF'`.
-3. If the ionizing orbit of your molecule has degeneracy, set `symmetry=True` in the molecule's constructor method, and the PySCF would help in splitting the degenerate orbits according to the symmetry. To identify their symmetry, see the example of O2.
 
 ## Examples
 
@@ -119,7 +118,7 @@ import numpy as np
 import pyscf
 n_beta  = 90
 n_gamma = 1
-molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2, symmetry=True)    # must add `symmetry=True` for molecules with degenerate HOMOs.
+molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2)
 # === HOMO & HOMO-1 are degenerate, need to distinguish HOMO-xz & HOMO-yz
 task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
@@ -131,17 +130,12 @@ ao = molO2.eval_gto('GTOval', yz_plane)
 wfn = np.dot(ao, coeff.T)
 index_yz = 0
 index_xz = 0
-if wfn.all() <= 1e-9:
+if np.all(abs(wfn) <= 1e-9):
     index_xz = -1
 else:
     index_yz = -1
 # =================================
 beta_grid = np.linspace(0, np.pi, n_beta)
-O2_HOMOxz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,0),
-                           lmax = 10, hf_method = "UHF",
-                           atom_grid_level = 7,
-                           orient_grid_size = (n_beta, n_gamma))
-print("O2_HOMOxz_G00 finished.")
 O2_HOMOxz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,

@@ -19,7 +19,7 @@ molC6H6 = pyscf.M(atom='''
                         H -2.48, 0,  0
                         H  2.48, 0,  0
                         ''',
-                basis='pc-1', symmetry=True)    # must add `symmetry=True` for molecules with degenerate HOMOs.
+                basis='pc-1')
 # === HOMO & HOMO-1 are degenerate, need to be recombined to HOMO-xz & HOMO-yz
 task = pyscf.scf.RHF(molC6H6).run()
 mo_occ = task.mo_occ
@@ -31,7 +31,7 @@ ao = molC6H6.eval_gto('GTOval', yz_plane)
 wfn = np.dot(ao, coeff.T)
 index_yz = 0
 index_xz = 0
-if wfn.all() <= 1e-9:
+if np.all(abs(wfn) <= 1e-9):
     index_xz = -1
 else:
     index_yz = -1
@@ -67,12 +67,10 @@ plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 plt.title("$\mathrm{C}_6 \mathrm{H}_6$",x=0.88,y=0.8,size=24)
 plt.text(285,130,"HOMO-$xz$",size=12)
-plt.text(180,140,"$-$",size=16,color='white',horizontalalignment='center')
-plt.text(180,35,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(6,140,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(6,35,"$-$",size=16,color='white',horizontalalignment='center')
-plt.text(354,140,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(354,35,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(90,135,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(90,40,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(270,135,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(270,40,"$-$",size=16,color='white',horizontalalignment='center')
 plt.savefig("./C6H6_HOMOxz_Example.pdf")
 plt.show()
 
@@ -90,9 +88,11 @@ plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 plt.title("$\mathrm{C}_6 \mathrm{H}_6$",x=0.88,y=0.8,size=24)
 plt.text(285,130,"HOMO-$yz$",size=12)
-plt.text(90,135,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(90,40,"$-$",size=16,color='white',horizontalalignment='center')
-plt.text(270,135,"$-$",size=16,color='white',horizontalalignment='center')
-plt.text(270,40,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(180,140,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(180,35,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(6,140,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(6,35,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(354,140,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(354,35,"$-$",size=16,color='white',horizontalalignment='center')
 plt.savefig("./C6H6_HOMOyz_Example.pdf")
 plt.show()

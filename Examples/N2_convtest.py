@@ -7,7 +7,7 @@ import pyscf
 from scipy import special
 n_beta  = 180
 n_gamma = 1
-molN2 = pyscf.M(atom="N 0,0,-0.5497; N 0,0,0.5497", basis="pc-4", spin=0, symmetry=True)
+molN2 = pyscf.M(atom="N 0,0,-0.5497; N 0,0,0.5497", basis="pc-4", spin=0)
 beta_grid = np.linspace(0, np.pi, n_beta)
 N2G00_HOMOm2_conv_1 = get_structure_factor(mol = molN2, rel_homo_index = -2, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
