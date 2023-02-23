@@ -6,7 +6,7 @@ PyStructureFactor is a python code which implements the weak-field asymptotic th
 ## Installation
 
 This program is currently distributed as a portable code. Simply place it under the same path with your program and add
-```
+```py
 from PyStructureFactor import get_structure_factor
 import pyscf
 ```
@@ -19,7 +19,7 @@ The program depends on the following python packages:
 ## Usage
 
 The main function of the program lies in the `get_structure_factor` method:
-```
+```py
 def get_structure_factor(mol,
                          rel_homo_index  = 0,
                          channel         = (0,0),
@@ -118,7 +118,7 @@ import numpy as np
 import pyscf
 n_beta  = 90
 n_gamma = 1
-molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2)
+molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="pc-4", spin=2, symmetry=True)
 # === HOMO & HOMO-1 are degenerate, need to distinguish HOMO-xz & HOMO-yz
 task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
