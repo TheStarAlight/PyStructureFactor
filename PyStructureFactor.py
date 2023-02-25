@@ -188,7 +188,7 @@ def orbital_dip(coeff,mol):
     return u_lab
 
 def get_structure_factor(mol,
-                        rel_homo_index  = 0,
+                        orbital_index  = 0,
                         channel         = (0,0),
                         lmax            = 10,
                         hf_method       = 'RHF',
@@ -202,7 +202,7 @@ def get_structure_factor(mol,
     # Parameters:
         mol : Mole
             The molecule object. Initialized by invoking `pyscf.M` or `pyscf.gto.M`.
-        rel_homo_index : int
+        orbital_index : int
             Index of the ionizing orbital relative to the HOMO. Default is 0. e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...
         channel : tuple
             Parabolic channel ν=(nξ, m). Default is (0,0).
@@ -243,7 +243,7 @@ def get_structure_factor(mol,
     else:
         raise Exception("error: method must be either 'RHF' or 'UHF'")
 
-    index = get_homo_index(mo_occ) + rel_homo_index
+    index = get_homo_index(mo_occ) + orbital_index
     energy_index = orbit_energy[index]
     coeff = numpy.expand_dims(coeff[:, index], axis=0)
     kappa = math.sqrt(-2 * energy_index)

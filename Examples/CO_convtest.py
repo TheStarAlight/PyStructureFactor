@@ -8,17 +8,17 @@ n_beta  = 180
 n_gamma = 1
 molCO = pyscf.M(atom="C 0,0,-0.180; O 0,0,0.950", basis="pc-4", spin=0)
 beta_grid = np.linspace(0, np.pi, n_beta)
-COG00_conv_3 = get_structure_factor(mol = molCO, rel_homo_index = 0, channel = (0,0),
+COG00_conv_3 = get_structure_factor(mol = molCO, orbital_index = 0, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("COG00_conv_3 finished.")
-COG00_conv_5 = get_structure_factor(mol = molCO, rel_homo_index = 0, channel = (0,0),
+COG00_conv_5 = get_structure_factor(mol = molCO, orbital_index = 0, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 5,
                            orient_grid_size = (n_beta, n_gamma))
 print("COG00_conv_5 finished.")
-COG00_conv_7 = get_structure_factor(mol = molCO, rel_homo_index = 0, channel = (0,0),
+COG00_conv_7 = get_structure_factor(mol = molCO, orbital_index = 0, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))

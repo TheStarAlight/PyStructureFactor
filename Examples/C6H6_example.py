@@ -38,12 +38,12 @@ else:
 # =================================
 beta_grid  = np.linspace(0, np.pi, n_beta)
 gamma_grid = np.linspace(0, 2*np.pi, n_gamma)
-C6H6_HOMOxz_G00 = get_structure_factor(mol = molC6H6, rel_homo_index = index_xz, channel = (0,0),
+C6H6_HOMOxz_G00 = get_structure_factor(mol = molC6H6, orbital_index = index_xz, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("C6H6_HOMOxz_G00 finished.")
-C6H6_HOMOyz_G00 = get_structure_factor(mol = molC6H6, rel_homo_index = index_yz, channel = (0,0),
+C6H6_HOMOyz_G00 = get_structure_factor(mol = molC6H6, orbital_index = index_yz, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))

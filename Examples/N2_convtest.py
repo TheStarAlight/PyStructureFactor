@@ -9,22 +9,22 @@ n_beta  = 180
 n_gamma = 1
 molN2 = pyscf.M(atom="N 0,0,-0.5497; N 0,0,0.5497", basis="pc-4", spin=0)
 beta_grid = np.linspace(0, np.pi, n_beta)
-N2G00_HOMOm2_conv_1 = get_structure_factor(mol = molN2, rel_homo_index = -2, channel = (0,0),
+N2G00_HOMOm2_conv_1 = get_structure_factor(mol = molN2, orbital_index = -2, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 1,
                            orient_grid_size = (n_beta, n_gamma))
 print("N2G00_HOMOm2_conv_1 finished.")
-N2G00_HOMOm2_conv_3 = get_structure_factor(mol = molN2, rel_homo_index = -2, channel = (0,0),
+N2G00_HOMOm2_conv_3 = get_structure_factor(mol = molN2, orbital_index = -2, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("N2G00_HOMOm2_conv_3 finished.")
-N2G00_HOMOm2_conv_5 = get_structure_factor(mol = molN2, rel_homo_index = -2, channel = (0,0),
+N2G00_HOMOm2_conv_5 = get_structure_factor(mol = molN2, orbital_index = -2, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 5,
                            orient_grid_size = (n_beta, n_gamma))
 print("N2G00_HOMOm2_conv_5 finished.")
-N2G00_HOMOm2_conv_7 = get_structure_factor(mol = molN2, rel_homo_index = -2, channel = (0,0),
+N2G00_HOMOm2_conv_7 = get_structure_factor(mol = molN2, orbital_index = -2, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))

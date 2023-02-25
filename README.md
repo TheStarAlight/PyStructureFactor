@@ -21,7 +21,7 @@ The program depends on the following python packages:
 The main function of the program lies in the `get_structure_factor` method:
 ```py
 def get_structure_factor(mol,
-                         rel_homo_index  = 0,
+                         orbital_index   = 0,
                          channel         = (0,0),
                          lmax            = 10,
                          hf_method       = 'RHF',
@@ -33,7 +33,7 @@ def get_structure_factor(mol,
 ### Parameters
 
 `mol` : The PySCF molecule object. Initialized by invoking `pyscf.M` or `pyscf.gto.M`.\
-`rel_homo_index` : Index of the ionizing orbital relative to the HOMO. **Default is `0`.** e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...\
+`orbital_index` : Index of the ionizing orbital relative to the HOMO. **Default is `0`.** e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...\
 `channel` : Parabolic channel $ν=(n_ξ, m)$. **Default is `(0,0)`.**\
 `lmax` : The maximum angular quantum number (larger l would be cut off) used in the sum. **Default is `10`.**\
 `hf_method` : Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. **Default is `'RHF'`.** *[!] Note: Must use 'UHF' for multiplet molecules.*\
@@ -62,7 +62,7 @@ n_beta  = 90
 n_gamma = 1
 molH2 = pyscf.M(atom="H 0,0,0.37; H 0,0,-0.37", basis="pc-1", spin=0)
 beta_grid = np.linspace(0, np.pi, n_beta)
-G_grid = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
+G_grid = get_structure_factor(mol = molH2, orbital_index = 0, channel = (0,0),
                               lmax = 10, hf_method = "RHF",
                               atom_grid_level = 3,
                               orient_grid_size = (n_beta, n_gamma))
@@ -77,17 +77,17 @@ n_beta  = 90
 n_gamma = 1
 molH2 = pyscf.M(atom="H 0,0,0.37; H 0,0,-0.37", basis="pc-4", spin=0)
 beta_grid = np.linspace(0, np.pi, n_beta)
-H2G00 = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,0),
+H2G00 = get_structure_factor(mol = molH2, orbital_index = 0, channel = (0,0),
                              lmax = 10, hf_method = "RHF",
                              atom_grid_level = 3,
                              orient_grid_size = (n_beta, n_gamma))
 print("H2G00 finished.")
-H2G01 = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (0,1),
+H2G01 = get_structure_factor(mol = molH2, orbital_index = 0, channel = (0,1),
                              lmax = 10, hf_method = "RHF",
                              atom_grid_level = 3,
                              orient_grid_size = (n_beta, n_gamma))
 print("H2G01 finished.")
-H2G10 = get_structure_factor(mol = molH2, rel_homo_index = 0, channel = (1,0),
+H2G10 = get_structure_factor(mol = molH2, orbital_index = 0, channel = (1,0),
                              lmax = 10, hf_method = "RHF",
                              atom_grid_level = 3,
                              orient_grid_size = (n_beta, n_gamma))
@@ -136,17 +136,17 @@ else:
     index_yz = -1
 # =================================
 beta_grid = np.linspace(0, np.pi, n_beta)
-O2_HOMOxz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,1),
+O2_HOMOxz_G01 = get_structure_factor(mol = molO2, orbital_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))
 print("O2_HOMOxz_G01 finished.")
-O2_HOMOyz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_yz, channel = (0,0),
+O2_HOMOyz_G00 = get_structure_factor(mol = molO2, orbital_index = index_yz, channel = (0,0),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))
 print("O2_HOMOyz_G00 finished.")
-O2_HOMOyz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_yz, channel = (0,1),
+O2_HOMOyz_G01 = get_structure_factor(mol = molO2, orbital_index = index_yz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))

@@ -23,17 +23,17 @@ else:
     index_yz = -1
 # =================================
 beta_grid = np.linspace(0, np.pi, n_beta)
-C2H2_HOMOyz_G00 = get_structure_factor(mol = molC2H2, rel_homo_index = index_yz, channel = (0,0),
+C2H2_HOMOyz_G00 = get_structure_factor(mol = molC2H2, orbital_index = index_yz, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 5,
                            orient_grid_size = (n_beta, n_gamma))
 print("C2H2_HOMOyz_G00 finished.")
-C2H2_HOMOxz_G01 = get_structure_factor(mol = molC2H2, rel_homo_index = index_xz, channel = (0,1),
+C2H2_HOMOxz_G01 = get_structure_factor(mol = molC2H2, orbital_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 5,
                            orient_grid_size = (n_beta, n_gamma))
 print("C2H2_HOMOxz_G01 finished.")
-C2H2_HOMOyz_G01 = get_structure_factor(mol = molC2H2, rel_homo_index = index_yz, channel = (0,1),
+C2H2_HOMOyz_G01 = get_structure_factor(mol = molC2H2, orbital_index = index_yz, channel = (0,1),
                            lmax = 10, hf_method = "RHF",
                            atom_grid_level = 5,
                            orient_grid_size = (n_beta, n_gamma))

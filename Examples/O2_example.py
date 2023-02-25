@@ -23,17 +23,17 @@ else:
     index_yz = -1
 # =================================
 beta_grid = np.linspace(0, np.pi, n_beta)
-O2_HOMOxz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_xz, channel = (0,1),
+O2_HOMOxz_G01 = get_structure_factor(mol = molO2, orbital_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))
 print("O2_HOMOxz_G01 finished.")
-O2_HOMOyz_G00 = get_structure_factor(mol = molO2, rel_homo_index = index_yz, channel = (0,0),
+O2_HOMOyz_G00 = get_structure_factor(mol = molO2, orbital_index = index_yz, channel = (0,0),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))
 print("O2_HOMOyz_G00 finished.")
-O2_HOMOyz_G01 = get_structure_factor(mol = molO2, rel_homo_index = index_yz, channel = (0,1),
+O2_HOMOyz_G01 = get_structure_factor(mol = molO2, orbital_index = index_yz, channel = (0,1),
                            lmax = 10, hf_method = "UHF",
                            atom_grid_level = 7,
                            orient_grid_size = (n_beta, n_gamma))
