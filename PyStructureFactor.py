@@ -231,6 +231,8 @@ def get_structure_factor(mol,
 
 
     if hf_method == 'RHF':
+        if mol.spin != 0:
+            print("[!] Warning: Spin != 0 but 'RHF' method is used. You should use 'UHF' method for non-zero spin.")
         mf = scf.RHF(mol).run(verbose=0)
         mo_occ = mf.mo_occ
         orbit_energy = mf.mo_energy
