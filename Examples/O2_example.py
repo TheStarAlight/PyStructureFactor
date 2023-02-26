@@ -43,9 +43,9 @@ import matplotlib.pyplot as plt
 def abs2(v):
     return np.real(v*np.conj(v))
 plt.figure(figsize=(5,4))
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOxz_G01), label=r'HOMO-xz, $\nu=(0,1)$')
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G00), label=r'HOMO-yz, $\nu=(0,0)$')
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G01), label=r'HOMO-yz, $\nu=(0,1)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOxz_G01), label=r'HOMO-$xz$, $\nu=(0,1)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G00), label=r'HOMO-$yz$, $\nu=(0,0)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G01), label=r'HOMO-$yz$, $\nu=(0,1)$')
 plt.xlabel(r'$\beta$ (deg)')
 plt.ylabel(r'$|G_{\nu}|^{2}$ (a.u.)')
 plt.rcParams['xtick.direction'] = 'in'

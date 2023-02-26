@@ -24,6 +24,7 @@ COG00_conv_7 = get_structure_factor(mol = molCO, orbital_index = 0, channel = (0
                            orient_grid_size = (n_beta, n_gamma))
 print("COG00_conv_7 finished.")
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 def abs2(v):
     return np.real(v*np.conj(v))
@@ -45,10 +46,11 @@ def COref(n_beta):
     g_beta = np.array(g_beta)
     return g_beta
 
-fig = plt.figure(figsize=(5,4))
-plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_3), label=r'grid_level=3')
-plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_5), label=r'grid_level=5')
-plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_7), label=r'grid_level=7')
+fig = plt.figure(figsize=(6.4,4.8))
+colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_3), label=r'grid_level=3', color=colors[1])
+plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_5), label=r'grid_level=5', color=colors[2])
+plt.plot(beta_grid*180/np.pi, abs2(COG00_conv_7), label=r'grid_level=7', color=colors[3])
 plt.plot(beta_grid*180/np.pi, COref(n_beta), linestyle='--', label=r'ref')
 plt.xlabel(r'$\beta$ (deg)')
 plt.ylabel(r'HOMO $|G_{00}|^{2}$ (a.u.)')
@@ -56,8 +58,16 @@ plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
 plt.title("$\mathrm{CO}$",x=0.9,y=0.85,size=24)
 plt.xlim([0, 180])
-plt.ylim(bottom=0)
+plt.ylim([0,45])
 plt.legend(frameon=False)
+plt.tight_layout()
+# draw subplot's zoomin region
+rect = mpl.patches.Rectangle((170,36),10,4,edgecolor='black',facecolor='none')
+fig.axes[0].add_patch(rect)
+line1 = mpl.lines.Line2D((170,104.5),(40,25),color='gray',linewidth=1)
+fig.axes[0].add_line(line1)
+line2 = mpl.lines.Line2D((170,104.5),(36,8.5),color='gray',linewidth=1)
+fig.axes[0].add_line(line2)
 # draw subplot
 left,bottom,width,height = 0.25,0.3,0.35,0.3
 subax = fig.add_axes([left,bottom,width,height])

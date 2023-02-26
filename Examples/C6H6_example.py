@@ -19,7 +19,7 @@ molC6H6 = pyscf.M(atom='''
                         H -2.48, 0,  0
                         H  2.48, 0,  0
                         ''',
-                basis='pc-1')
+                basis='pc-1', symmetry=True)
 # === HOMO & HOMO-1 are degenerate, need to be recombined to HOMO-xz & HOMO-yz
 task = pyscf.scf.RHF(molC6H6).run()
 mo_occ = task.mo_occ
@@ -53,39 +53,34 @@ import matplotlib.pyplot as plt
 def abs2(v):
     return np.real(v*np.conj(v))
 
-fig=plt.figure(figsize=(8,3))
+fig = plt.figure(figsize=(6.4,8))
+
+plt.subplot(2,1,1)
 plt.xlim([0, 360])
 plt.ylim([0, 180])
 norm = plt.Normalize(vmin=-2, vmax=2)
-heatmap = plt.imshow(np.real(C6H6_HOMOxz_G00), cmap='RdBu', interpolation='nearest', extent=(0,360,0,180), norm=norm)
-fig.colorbar(heatmap,ax=fig.axes[0],label='$G_{00}$ (a.u.)')
-plt.xlabel(r'$\beta$ (deg)')
-plt.ylabel(r'$\gamma$ (deg)')
+heatmap = plt.imshow(np.real(C6H6_HOMOxz_G00), cmap='RdBu', interpolation='nearest', extent=(0,360,0,180), norm=norm, aspect='auto')
+# plt.xlabel(r'$\gamma$ (deg)')
+plt.ylabel(r'$\beta$ (deg)')
 plt.yticks(np.arange(0,180+1,30))
 plt.xticks(np.arange(0,360+1,45))
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['ytick.direction'] = 'in'
+fig.axes[0].xaxis.set_ticklabels([])
 plt.title("$\mathrm{C}_6 \mathrm{H}_6$",x=0.88,y=0.8,size=24)
 plt.text(285,130,"HOMO-$xz$",size=12)
-plt.text(90,135,"$-$",size=16,color='white',horizontalalignment='center')
-plt.text(90,40,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(270,135,"$+$",size=16,color='white',horizontalalignment='center')
-plt.text(270,40,"$-$",size=16,color='white',horizontalalignment='center')
-plt.savefig("./C6H6_HOMOxz_Example.pdf")
-plt.show()
+plt.text(90,135,"$+$",size=16,color='white',horizontalalignment='center')
+plt.text(90,40,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(270,135,"$-$",size=16,color='white',horizontalalignment='center')
+plt.text(270,40,"$+$",size=16,color='white',horizontalalignment='center')
 
-fig=plt.figure(figsize=(8,3))
+plt.subplot(2,1,2)
 plt.xlim([0, 360])
 plt.ylim([0, 180])
 norm = plt.Normalize(vmin=-2, vmax=2)
-heatmap = plt.imshow(np.real(C6H6_HOMOyz_G00), cmap='RdBu', interpolation='nearest', extent=(0,360,0,180), norm=norm)
-fig.colorbar(heatmap,ax=fig.axes[0],label='$G_{00}$ (a.u.)')
-plt.xlabel(r'$\beta$ (deg)')
-plt.ylabel(r'$\gamma$ (deg)')
+heatmap = plt.imshow(np.real(C6H6_HOMOyz_G00), cmap='RdBu', interpolation='nearest', extent=(0,360,0,180), norm=norm, aspect='auto')
+plt.xlabel(r'$\gamma$ (deg)')
+plt.ylabel(r'$\beta$ (deg)')
 plt.yticks(np.arange(0,180+1,30))
 plt.xticks(np.arange(0,360+1,45))
-plt.rcParams['xtick.direction'] = 'in'
-plt.rcParams['ytick.direction'] = 'in'
 plt.title("$\mathrm{C}_6 \mathrm{H}_6$",x=0.88,y=0.8,size=24)
 plt.text(285,130,"HOMO-$yz$",size=12)
 plt.text(180,140,"$-$",size=16,color='white',horizontalalignment='center')
@@ -94,5 +89,8 @@ plt.text(6,140,"$+$",size=16,color='white',horizontalalignment='center')
 plt.text(6,35,"$-$",size=16,color='white',horizontalalignment='center')
 plt.text(354,140,"$+$",size=16,color='white',horizontalalignment='center')
 plt.text(354,35,"$-$",size=16,color='white',horizontalalignment='center')
-plt.savefig("./C6H6_HOMOyz_Example.pdf")
+
+fig.colorbar(heatmap,ax=fig.axes,label='$G_{00}$ (a.u.)',aspect=40)
+
+plt.savefig("./C6H6_Example.pdf")
 plt.show()
