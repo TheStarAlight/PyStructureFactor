@@ -38,7 +38,7 @@ def get_structure_factor(mol,
 `lmax` : The maximum angular quantum number (larger l would be cut off) used in the sum. **Default is `10`.**\
 `hf_method` : Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. **Default is `'RHF'`.** *[!] Note: Must use 'UHF' for multiplet molecules.*\
 `atom_grid_level` : Level of fineness of the grid used in integration (see also `pyscf.dft.Grid`), which controls the number of radial and angular grids, ranging from 0 to 9. **Default is `3`.**\
-`orient_grid_size` : Indicates the size of $(\beta,\gamma)$ grid (in the output) in $\beta$,$\gamma$ directions respectively. **Default is `(90,1)`**. The grid is uniform, with $\beta$ ranging from $[0,\pi)$ and $γ$ ranging from $[0,2\pi)$. Setting the $\gamma$ grid count to 1 indicates that $\gamma$ would be zero throughout the calculation.\
+`orient_grid_size` : Indicates the size of $(\beta,\gamma)$ grid (in the output) in $\beta,\gamma$ directions respectively. **Default is `(90,1)`**. The grid is uniform, with $\beta$ ranging from $[0,\pi)$ and $γ$ ranging from $[0,2\pi)$. Setting the $\gamma$ grid count to 1 indicates that $\gamma$ would be zero throughout the calculation.\
 `move_dip_zero` : Indicates whether to move the molecule so that the dipole of the parent ion equals zero. **Default `True`.**\
 `rmax` : [Keep default] Indicates the cut off limit of the radial grid points, points of radius>`rmax` would not be accounted in calculation. **Default is `40`.**
 
@@ -106,11 +106,13 @@ plt.title("$\mathrm{H}_2$",x=0.9,y=0.85,size=24)
 plt.xlim([0, 180])
 plt.ylim(bottom=0)
 plt.legend()
+plt.tight_layout()
 plt.savefig("./H2_Example.pdf")
 plt.show()
 ```
 
 ### O2 example
+Remember that for molecules with non-zero total spin $S$, specify the spin in the `pyscf.M` with `spin=<2S>`.
 
 ```py
 from PyStructureFactor import get_structure_factor, get_homo_index
@@ -156,9 +158,9 @@ import matplotlib.pyplot as plt
 def abs2(v):
     return np.real(v*np.conj(v))
 plt.figure(figsize=(5,4))
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOxz_G01), label=r'HOMO-xz, $\nu=(0,1)$')
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G00), label=r'HOMO-yz, $\nu=(0,0)$')
-plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G01), label=r'HOMO-yz, $\nu=(0,1)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOxz_G01), label=r'HOMO-$xz$, $\nu=(0,1)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G00), label=r'HOMO-$yz$, $\nu=(0,0)$')
+plt.plot(beta_grid*180/np.pi, abs2(O2_HOMOyz_G01), label=r'HOMO-$yz$, $\nu=(0,1)$')
 plt.xlabel(r'$\beta$ (deg)')
 plt.ylabel(r'$|G_{\nu}|^{2}$ (a.u.)')
 plt.rcParams['xtick.direction'] = 'in'
@@ -167,6 +169,7 @@ plt.title("$\mathrm{O}_2$",x=0.9,y=0.85,size=24)
 plt.xlim([0, 180])
 plt.ylim(bottom=0)
 plt.legend()
+plt.tight_layout()
 plt.savefig("./O2_Example.pdf")
 plt.show()
 ```

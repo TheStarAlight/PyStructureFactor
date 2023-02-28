@@ -40,13 +40,13 @@ import matplotlib.pyplot as plt
 def abs2(v):
     return np.real(v*np.conj(v))
 fig = plt.figure(figsize=(6.4,4.8))
-plt.plot(beta_grid*180/np.pi, np.abs2(CO_HOMO_G00), label=r'HOMO')
-plt.plot(beta_grid*180/np.pi, np.abs2(CO_HOMOm1yz_G00), label=r'HOMO-1 ($yz$)')
+plt.plot(beta_grid*180/np.pi, abs2(CO_HOMO_G00), label=r'HOMO')
+plt.plot(beta_grid*180/np.pi, abs2(CO_HOMOm1yz_G00), label=r'HOMO-1 ($yz$)')
 plt.xlabel(r'$\beta$ (deg)')
 plt.ylabel(r'$|G_{\nu}|^{2}$ (a.u.)')
 plt.rcParams['xtick.direction'] = 'in'
 plt.rcParams['ytick.direction'] = 'in'
-plt.title("$\mathrm{H}_2$",x=0.9,y=0.85,size=30)
+plt.title("$\mathrm{CO}$",x=0.9,y=0.85,size=30)
 plt.xlim([0, 180])
 plt.ylim(bottom=0,top=45)
 plt.legend()

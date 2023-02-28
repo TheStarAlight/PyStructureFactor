@@ -25,17 +25,17 @@ else:
 beta_grid = np.linspace(0, np.pi, n_beta)
 C2H2_HOMOyz_G00 = get_structure_factor(mol = molC2H2, orbital_index = index_yz, channel = (0,0),
                            lmax = 10, hf_method = "RHF",
-                           atom_grid_level = 5,
+                           atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("C2H2_HOMOyz_G00 finished.")
 C2H2_HOMOxz_G01 = get_structure_factor(mol = molC2H2, orbital_index = index_xz, channel = (0,1),
                            lmax = 10, hf_method = "RHF",
-                           atom_grid_level = 5,
+                           atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("C2H2_HOMOxz_G01 finished.")
 C2H2_HOMOyz_G01 = get_structure_factor(mol = molC2H2, orbital_index = index_yz, channel = (0,1),
                            lmax = 10, hf_method = "RHF",
-                           atom_grid_level = 5,
+                           atom_grid_level = 3,
                            orient_grid_size = (n_beta, n_gamma))
 print("C2H2_HOMOyz_G01 finished.")
 
@@ -54,5 +54,6 @@ plt.title("$\mathrm{C}_2 \mathrm{H}_2$",x=0.87,y=0.85,size=24)
 plt.xlim([0, 180])
 plt.ylim(bottom=0)
 plt.legend(frameon=False)
+plt.tight_layout()
 plt.savefig("./C2H2_Example.pdf")
 plt.show()
