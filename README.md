@@ -14,7 +14,14 @@ to the header of your program.
 
 ### Dependencies
 The program depends on the following python packages:
-`numpy`, `scipy`, `pyscf` and `wigner`. If you encountered error when installing the `wigner` package, try a different package source or directly install from a whl file. In the examples, `matplotlib` is used for plotting.
+`numpy`, `scipy`, `pyscf` and `wigner`.
+
+To run the examples, `matplotlib` is also required for plotting.
+
+### Troubleshooting
+
+- *Unable to install the `wigner` package*: Try a different package source or directly install from a whl file (provided in the `./misc/` directory).
+- *`Numpy` broken support for the dtype*: Try switching to another `numpy` version. (`numpy` v1.24.1 runs well on the WSL Ubuntu 22.04 LTS, while under v1.25.0 this problem occurs)
 
 ## Usage
 
@@ -67,6 +74,7 @@ G_grid = get_structure_factor(mol = molH2, orbital_index = 0, channel = (0,0),
                               atom_grid_level = 3,
                               orient_grid_size = (n_beta, n_gamma))
 ```
+This example took 1.2 sec. to finish on an *AMD Ryzen 9 7950X CPU* on *WSL Ubuntu 22.04 LTS*.
 
 ### H2 example
 ```py
@@ -110,6 +118,7 @@ plt.tight_layout()
 plt.savefig("./H2_Example.pdf")
 plt.show()
 ```
+This example took 16 sec. to finish on an *AMD Ryzen 9 7950X CPU* on *WSL Ubuntu 22.04 LTS*.
 
 ### O2 example
 Remember that for molecules with non-zero total spin $S$, specify the spin in the `pyscf.M` with `spin=<2S>`.
@@ -173,5 +182,6 @@ plt.tight_layout()
 plt.savefig("./O2_Example.pdf")
 plt.show()
 ```
+This example took about 6.5 min. to finish on an *AMD Ryzen 9 7950X CPU* on *WSL Ubuntu 22.04 LTS*.
 
-For more examples, please refer to the "./Examples/" directory.
+For more examples, please refer to the `./Examples/` directory.
