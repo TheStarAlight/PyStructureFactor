@@ -2,7 +2,7 @@ import numpy
 import math
 import multiprocessing as mp
 from multiprocessing.dummy import Pool as ThreadPool
-from pyscf import df, scf
+from pyscf import df, scf, mcscf
 from scipy import special
 from pyscf import gto, lib, dft
 from pyscf.dft import radi
@@ -192,6 +192,7 @@ def get_structure_factor(mol,
                         channel         = (0,0),
                         lmax            = 10,
                         hf_method       = 'RHF',
+                        casscf_conf     = None,
                         atom_grid_level = 3,
                         orient_grid_size= (90,1),
                         move_dip_zero   = True,
@@ -210,6 +211,8 @@ def get_structure_factor(mol,
             The maximum angular quantum number (larger l would be cut off) used in the sum. Default is 10.
         hf_method : str
             Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'. [!] Note: Must use 'UHF' for multiplet molecules.
+        casscf_conf : tuple
+            Configuration of CASSCF calculation consisting of (n_active_orb, n_active_elec). Specifying None (by default) indicates employing HF instead of CASSCF.
         atom_grid_level : int
             Level of fineness of the grid used in integration (see also pyscf.dft.Grid), which controls the number of radial and angular grids, ranging from 0 to 9. Default is 3.
         orient_grid_size : tuple
@@ -233,23 +236,44 @@ def get_structure_factor(mol,
     if hf_method == 'RHF':
         if mol.spin != 0:
             print("[!] Warning: Spin != 0 but 'RHF' method is used. You should use 'UHF' method for non-zero spin.")
-        mf = scf.RHF(mol).run(verbose=0)
-        mo_occ = mf.mo_occ
-        orbit_energy = mf.mo_energy
-        coeff = mf.mo_coeff
+        print("[i] Info: Running HF ...")
+        hftask = scf.RHF(mol).run(verbose=0)
+        if not (casscf_conf is None):
+            print("[i] Info: Running CASSCF ...")
+            casscftask = mcscf.CASSCF(hftask, casscf_conf[0], casscf_conf[1]) .run(verbose=0)
+        mo_occ = hftask.mo_occ
+        orbit_energy = hftask.mo_energy
+        if not (casscf_conf is None):
+            coeff = casscftask.mo_coeff
+        else:
+            coeff = hftask.mo_coeff
     elif hf_method == 'UHF':
-        mf = scf.UHF(mol).run(verbose=0)
-        mo_occ = mf.mo_occ[0]
-        orbit_energy = mf.mo_energy[0]
-        coeff = mf.mo_coeff[0]
+        print("[i] Info: Running HF ...")
+        hftask = scf.UHF(mol).run(verbose=0)
+        if not (casscf_conf is None):
+            print("[i] Info: Running CASSCF ...")
+            casscftask = mcscf.UCASSCF(hftask, casscf_conf[0], casscf_conf[1]) .run(verbose=0)
+        mo_occ = hftask.mo_occ[0]
+        orbit_energy = hftask.mo_energy[0]
+        if not (casscf_conf is None):
+            coeff = casscftask.mo_coeff[0]
+        else:
+            coeff = hftask.mo_coeff[0]
     else:
-        raise Exception("error: method must be either 'RHF' or 'UHF'")
+        raise Exception("error: hf_method must be either 'RHF' or 'UHF'")
+    if not hftask.converged:
+        raise Exception("error: The Hartree-Fock calculation failed to converge, check your parameters.")
+    if not (casscf_conf is None):
+        if not casscftask.converged:
+            raise Exception("error: The CASSCF calculation failed to converge, check your parameters.")
+
+    print("[i] Info: Calculating structure factors ...")
 
     index = get_homo_index(mo_occ) + orbital_index
     energy_index = orbit_energy[index]
     coeff = numpy.expand_dims(coeff[:, index], axis=0)
     kappa = math.sqrt(-2 * energy_index)
-    dm = mf.make_rdm1()
+    dm = hftask.make_rdm1()
 
     if move_dip_zero:
         import copy
@@ -262,7 +286,7 @@ def get_structure_factor(mol,
         tDict["unit"] = 'Bohr'
         mol = gto.M(**tDict)
         u = orbital_dip(coeff,mol)
-        dip_moment = mf.dip_moment(unit="A.U.",verbose=0)
+        dip_moment = hftask.dip_moment(unit="A.U.",verbose=0)
         D = (u - dip_moment)
         move_distance = D/Z
         atom = copy.deepcopy(mol._atom)
