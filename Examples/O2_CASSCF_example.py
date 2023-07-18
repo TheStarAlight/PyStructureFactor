@@ -5,7 +5,7 @@ import numpy as np
 import pyscf
 n_beta  = 90
 n_gamma = 1
-molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="ccpVDz", spin=2, symmetry=True)
+molO2 = pyscf.M(atom="O 0,0,-1.14095; O 0,0,1.14095", unit="B", basis="ccpVDZ", spin=2, symmetry=True)
 # === HOMO & HOMO-1 are degenerate, need to distinguish HOMO-xz & HOMO-yz
 task = pyscf.scf.UHF(molO2).run()
 mo_occ = task.mo_occ
