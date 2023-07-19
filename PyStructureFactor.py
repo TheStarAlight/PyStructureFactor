@@ -188,7 +188,7 @@ def orbital_dip(coeff,mol):
     return u_lab
 
 def get_structure_factor(mol,
-                        orbital_index  = 0,
+                        orbital_index   = 0,
                         channel         = (0,0),
                         lmax            = 10,
                         hf_method       = 'RHF',
@@ -208,17 +208,17 @@ def get_structure_factor(mol,
         channel : tuple
             Parabolic channel ν=(nξ, m). Default is (0,0).
         lmax : int
-            The maximum angular quantum number (larger l would be cut off) used in the sum. Default is 10.
+            The cut-off limit of the angular quantum number (larger l would be cut off) used in the summation. Default is 10.
         hf_method : str
-            Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'. [!] Note: Must use 'UHF' for multiplet molecules.
+            Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. Default is 'RHF'. [!] Note: Must use 'UHF' for open-shell molecules.
         casscf_conf : tuple
             Configuration of CASSCF calculation consisting of (n_active_orb, n_active_elec). Specifying None (by default) indicates employing HF instead of CASSCF.
         atom_grid_level : int
-            Level of fineness of the grid used in integration (see also pyscf.dft.Grid), which controls the number of radial and angular grids, ranging from 0 to 9. Default is 3.
+            Level of fineness of the grid used in integration (see also pyscf.dft.Grid), which controls the number of radial and angular grids around each atom in the evaluation of the integration, ranging from 0 to 9. Default is 3.
         orient_grid_size : tuple
-            Indicates the size of (β,γ) grid (in the output) in β,γ directions respectively. Default is (90,1). The grid is uniform, with β ranging from [0,π) and γ ranging from [0,2π).
+            Indicates the size of the output (β,γ) grid which defines the orientation of the molecule with respect to the polarization direction of the laser field. Default is (90,1). The grid is uniform, with β ranging from [0,π) and γ ranging from [0,2π).
         move_dip_zero : bool
-            Indicates whether to move the molecule so that the dipole of the parent ion equals zero. Default true.
+            Indicates whether to move the molecule so that the dipole of the parent ion vanishes. Default true.
         rmax : float
             Indicates the cut off limit of the radial grid points, points of radius>rmax would not be accounted in calculation. Default is 40.
 

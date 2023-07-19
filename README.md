@@ -21,7 +21,7 @@ To run the examples, `matplotlib` is also required for plotting.
 ### Troubleshooting
 
 - *Unable to install the `wigner` package*: Try a different package source or directly install from a whl file (provided in the `./misc/` directory).
-- *`Numpy` broken support for the dtype*: Try switching to another `numpy` version. (`numpy` v1.24.1 runs well on the WSL Ubuntu 22.04 LTS, while under v1.25.0 this problem occurs)
+- *`Numpy` broken support for the dtype*: Try switching to another `numpy` version. [`numpy` v1.24.1 runs well on the WSL Ubuntu 22.04 LTS (@`pyscf` v2.3.0), while under `numpy` v1.25.0 this problem occurs]
 
 ## Usage
 
@@ -32,6 +32,7 @@ def get_structure_factor(mol,
                          channel         = (0,0),
                          lmax            = 10,
                          hf_method       = 'RHF',
+                         casscf_conf     = None,
                          atom_grid_level = 3,
                          orient_grid_size= (90,1),
                          move_dip_zero   = True,
@@ -39,22 +40,32 @@ def get_structure_factor(mol,
 ```
 ### Parameters
 
-`mol` : The PySCF molecule object. Initialized by invoking `pyscf.M` or `pyscf.gto.M`.\
-`orbital_index` : Index of the ionizing orbital relative to the HOMO. **Default is `0`.** e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...\
-`channel` : Parabolic channel $ν=(n_ξ, m)$. **Default is `(0,0)`.**\
-`lmax` : The maximum angular quantum number (larger l would be cut off) used in the sum. **Default is `10`.**\
-`hf_method` : Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. **Default is `'RHF'`.** *[!] Note: Must use 'UHF' for multiplet molecules.*\
-`atom_grid_level` : Level of fineness of the grid used in integration (see also `pyscf.dft.Grid`), which controls the number of radial and angular grids, ranging from 0 to 9. **Default is `3`.**\
-`orient_grid_size` : Indicates the size of $(\beta,\gamma)$ grid (in the output) in $\beta,\gamma$ directions respectively. **Default is `(90,1)`**. The grid is uniform, with $\beta$ ranging from $[0,\pi)$ and $γ$ ranging from $[0,2\pi)$. Setting the $\gamma$ grid count to 1 indicates that $\gamma$ would be zero throughout the calculation.\
-`move_dip_zero` : Indicates whether to move the molecule so that the dipole of the parent ion equals zero. **Default `True`.**\
-`rmax` : [Keep default] Indicates the cut off limit of the radial grid points, points of radius>`rmax` would not be accounted in calculation. **Default is `40`.**
+- `mol` : The PySCF molecule object. Initialized by invoking `pyscf.M` or `pyscf.gto.M`.
+
+- `orbital_index` : Index of the ionizing orbital relative to the HOMO. **Default is `0`.** e.g., HOMO -> 0, LUMO -> +1, HOMO-1 -> -1, ...
+
+- `channel` : Parabolic channel $ν=(n_ξ, m)$. **Default is `(0,0)`.**
+
+- `lmax` : The cut-off limit of the angular quantum number (larger l would be cut off) used in the summation. **Default is `10`.**
+
+- `hf_method` : Indicates whether 'RHF' or 'UHF' should be used in molecular HF calculation. **Default is `'RHF'`.** *[!] Note: Must use 'UHF' for open-shell molecules.*
+
+- `casscf_conf` : Configuration of CASSCF calculation consisting of (n_active_orb, n_active_elec). Specifying `None` (by default) indicates employing HF instead of CASSCF.
+
+- `atom_grid_level` : Level of fineness of the grid used in integration (see also `pyscf.dft.Grid`), which controls the number of radial and angular grids around each atom in the evaluation of the integration, ranging from 0 to 9. **Default is `3`.**
+
+- `orient_grid_size` : Indicates the size of the output $(\beta,\gamma)$ grid which defines the orientation of the molecule with respect to the polarization direction of the laser field. **Default is `(90,1)`**. The grid is uniform, with $\beta$ ranging from $[0,\pi)$ and $γ$ ranging from $[0,2\pi)$. Setting the $\gamma$ grid count to 1 indicates that $\gamma$ would be zero throughout the calculation.
+
+- `move_dip_zero` : Indicates whether to move the molecule so that the dipole of the parent ion vanishes. **Default `True`.**
+
+- `rmax` : [Keep default] Indicates the cut off limit of the radial grid points, points of radius>`rmax` would not be accounted in calculation. **Default is `40`.**
 
 ### Returns
 A numpy array containing the structure factors $G_{n_ξ,\ m}$ of the given channel on the $(\beta,\gamma)$ orientation grid. Shape = `orient_grid_size`.
 
 ### Tips on parameter choice
 1. Always specify the `basis` parameter when initialzing the PySCF molecule object and choose a basis set of high-accuracy. The calculation's reliability is sensitive to the wave function, a better basis set is crucial in obtaining a satisfying result.
-2. When initializing the molecule object, for singlet molecules, specify `atom` and `basis`. If your molecule is a multiplet, you should also specify `spin=<2S>`, and set `hf_method='UHF'`.
+2. When initializing the molecule object, for close-shell molecules, specify `atom` and `basis`. If your molecule is an open-shell system, you should also specify `spin=<2S>`, and set `hf_method='UHF'`.
 
 ## Examples
 
@@ -77,6 +88,9 @@ G_grid = get_structure_factor(mol = molH2, orbital_index = 0, channel = (0,0),
 This example took 1.2 sec. to finish on an *AMD Ryzen 9 7950X CPU* on *WSL Ubuntu 22.04 LTS*.
 
 ### H2 example
+
+Note: this example also requires the `matplotlib` package.
+
 ```py
 from PyStructureFactor import get_structure_factor
 import numpy as np
@@ -121,6 +135,8 @@ plt.show()
 This example took 16 sec. to finish on an *AMD Ryzen 9 7950X CPU* on *WSL Ubuntu 22.04 LTS*.
 
 ### O2 example
+
+Note: this example also requires the `matplotlib` package.
 Remember that for molecules with non-zero total spin $S$, specify the spin in the `pyscf.M` with `spin=<2S>`.
 
 ```py
