@@ -2,6 +2,7 @@
 
 PyStructureFactor is a python code which implements the weak-field asymptotic theory (WFAT) to calculate the WFAT structure factor of molecules, which is crucial in calculating the tunneling ionization rate of molecules in strong laser fields.
 
+Our article which introduces the WFAT theory and the program is now available on [*Comput. Phys. Commun.*, 108882 (2023)](https://www.sciencedirect.com/science/article/pii/S0010465523002278). DOI: [10.1016/j.cpc.2023.108882](https://doi.org/10.1016/j.cpc.2023.108882)
 
 ## Installation
 
